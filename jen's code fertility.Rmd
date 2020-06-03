@@ -1,0 +1,515 @@
+---
+title: "Untitled"
+author: "Aishwarya Kothari"
+date: "3/19/2020"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+```{r}
+library(readxl)
+library(lmerTest)
+library(car)
+library(zoo)
+library(beanplot)
+library(emmeans)
+library(lme4)
+```
+
+
+######spikelet number per head######
+#####CONTROL#####
+
+####################################################
+######Rep 1 ########################################
+####################################################
+```{r}
+spike <- read_excel("harvesting rep 1.xlsx", sheet = 3)
+head(spike)
+
+spike$Chamber <- as.factor(spike$Chamber)
+spike$Plant <- as.factor(spike$Plant)
+
+spike$single <- paste(spike$Line, spike$BL, spike$HeatStress, spike$Plant, spike$Spike, sep = "_")
+```
+
+###simpler Vida
+```{r}
+head(spike)
+vida <- spike[spike$Line =="Vida",]
+vidaAgg<- aggregate(vida$Spike, by = list(vida$HeatStress, vida$BL, vida$Plant, vida$Spike), FUN= length)
+
+par(mfrow = c(1,3))
+par(mar = c(5,5,2,2))
+boxplot(vidaAgg[vidaAgg$Group.2 == "C",5] ~ vidaAgg[vidaAgg$Group.2 == "C",1], xlab = "heat stress",
+        ylab = "spikelet number per head", col = c("blue", "orange"), 
+        cex.lab=2, names.arg = 2, las = 2, xaxt="n", yaxt="n",
+        ylim = c(0,25), main = "Rep 1")
+axis(1, at=c(1,2), labels=c("22 degrees", "29 degrees"), cex.axis=1.7)
+axis(2, at=c(0:25), labels=0:25, cex.axis=1, las = 2)
+```
+
+```{r}
+
+leveneTest(vidaAgg[vidaAgg$Group.2 == "C",5] ~ vidaAgg[vidaAgg$Group.2 == "C",1])
+wilcox.test(vidaAgg[vidaAgg$Group.2 == "C",5] ~ vidaAgg[vidaAgg$Group.2 == "C",1])
+```
+
+```{r}
+hiline<-spike[spike$Line =="Hiline",]
+hilAgg<- aggregate(hiline$Spike, by = list(hiline$HeatStress, hiline$BL, hiline$Plant, hiline$Spike), FUN= length)
+
+par(mfrow = c(1,3))
+par(mar = c(5,5,2,2))
+boxplot(hilAgg[hilAgg$Group.2 == "C",5] ~ hilAgg[hilAgg$Group.2 == "C",1], xlab = "heat stress",
+        ylab = "spikelet number per head", col = c("blue", "orange"), 
+        cex.lab=2, names.arg = 2, las = 2, xaxt="n", yaxt="n",
+        ylim = c(0,25), main = "Rep 1")
+axis(1, at=c(1,2), labels=c("22 degrees", "29 degrees"), cex.axis=1.7)
+axis(2, at=c(0:25), labels=0:25, cex.axis=1, las = 2)
+```
+
+```{r}
+leveneTest(hilAgg[hilAgg$Group.2 == "C",5] ~ hilAgg[hilAgg$Group.2 == "C",1])
+wilcox.test(hilAgg[hilAgg$Group.2 == "C",5] ~ hilAgg[hilAgg$Group.2 == "C",1])
+```
+
+```{r}
+mth<-spike[spike$Line =="MTH",]
+mtAgg<- aggregate(mth$Spike, by = list(mth$HeatStress, mth$BL, mth$Plant, mth$Spike), FUN= length)
+
+par(mfrow = c(1,3))
+par(mar = c(5,5,2,2))
+boxplot(mtAgg[mtAgg$Group.2 == "C",5] ~ mtAgg[hilAgg$Group.2 == "C",1], xlab = "heat stress",
+        ylab = "spikelet number per head", col = c("blue", "orange"), 
+        cex.lab=2, names.arg = 2, las = 2, xaxt="n", yaxt="n",
+        ylim = c(0,25), main = "Rep 1")
+axis(1, at=c(1,2), labels=c("22 degrees", "29 degrees"), cex.axis=1.7)
+axis(2, at=c(0:25), labels=0:25, cex.axis=1, las = 2)
+```
+
+```{r}
+leveneTest(mtAgg[mtAgg$Group.2 == "C",5] ~ mtAgg[mtAgg$Group.2 == "C",1])
+wilcox.test(mtAgg[mtAgg$Group.2 == "C",5] ~ mtAgg[mtAgg$Group.2 == "C",1])
+```
+
+####################################################
+######Rep 2 ########################################
+####################################################
+```{r}
+spike2 <- read_excel(path = "harvesting rep 2.xlsx", sheet = 2)
+head(spike2)
+
+spike2$Chamber <- as.factor(spike2$Chamber)
+spike2$Plant <- as.factor(spike2$Plant)
+
+spike2$single <- paste(spike2$Line, spike2$BL, spike2$HeatStress, spike2$Plant, spike2$Spike, sep = "_")
+```
+
+###simpler Vida
+```{r}
+vida2 <- spike2[spike2$Line =="Vida",]
+vidaAgg2<- aggregate(vida2$Spike, by = list(vida2$HeatStress, vida2$BL, vida2$Plant, vida2$Spike), FUN= length)
+par(mar = c(5,5,2,2))
+
+boxplot(vidaAgg2[vidaAgg2$Group.2 == "C",5] ~ vidaAgg2[vidaAgg$Group.2 == "C",1], xlab = "heat stress",
+        ylab = "spikelet number per head", col = c("blue", "orange"), 
+        cex.lab=2, names.arg = 2, las = 2, xaxt="n", yaxt="n",
+        ylim = c(0,25), main = "Rep 2")
+axis(1, at=c(1,2), labels=c("22 degrees", "29 degrees"), cex.axis=1.7)
+axis(2, at=c(0:25), labels=0:25, cex.axis=1, las = 2)
+```
+
+```{r}
+leveneTest(vidaAgg2[vidaAgg2$Group.2 == "C",5] ~ vidaAgg2[vidaAgg2$Group.2 == "C",1])
+wilcox.test(vidaAgg2[vidaAgg2$Group.2 == "C",5] ~ vidaAgg2[vidaAgg2$Group.2 == "C",1])
+```
+
+```{r}
+hiline2<-spike2[spike2$Line =="Hiline",]
+hilAgg2<- aggregate(hiline2$Spike, by = list(hiline2$HeatStress, hiline2$BL, hiline2$Plant, hiline2$Spike), FUN= length)
+
+par(mfrow = c(1,3))
+par(mar = c(5,5,2,2))
+boxplot(hilAgg2[hilAgg2$Group.2 == "C",5] ~ hilAgg2[hilAgg2$Group.2 == "C",1], xlab = "heat stress",
+        ylab = "spikelet number per head", col = c("blue", "orange"), 
+        cex.lab=2, names.arg = 2, las = 2, xaxt="n", yaxt="n",
+        ylim = c(0,25), main = "Rep 1")
+axis(1, at=c(1,2), labels=c("22 degrees", "29 degrees"), cex.axis=1.7)
+axis(2, at=c(0:25), labels=0:25, cex.axis=1, las = 2)
+```
+
+```{r}
+leveneTest(hilAgg2[hilAgg2$Group.2 == "C",5] ~ hilAgg2[hilAgg2$Group.2 == "C",1])
+wilcox.test(hilAgg2[hilAgg2$Group.2 == "C",5] ~ hilAgg2[hilAgg2$Group.2 == "C",1])
+```
+
+```{r}
+mth2<-spike2[spike2$Line =="MTH",]
+mtAgg2<- aggregate(mth2$Spike, by = list(mth2$HeatStress, mth2$BL, mth2$Plant, mth2$Spike), FUN= length)
+
+par(mfrow = c(1,3))
+par(mar = c(5,5,2,2))
+boxplot(mtAgg2[mtAgg2$Group.2 == "C",5] ~ mtAgg2[hilAgg2$Group.2 == "C",1], xlab = "heat stress",
+        ylab = "spikelet number per head", col = c("blue", "orange"), 
+        cex.lab=2, names.arg = 2, las = 2, xaxt="n", yaxt="n",
+        ylim = c(0,25), main = "Rep 1")
+axis(1, at=c(1,2), labels=c("22 degrees", "29 degrees"), cex.axis=1.7)
+axis(2, at=c(0:25), labels=0:25, cex.axis=1, las = 2)
+```
+
+```{r}
+leveneTest(mtAgg2[mtAgg2$Group.2 == "C",5] ~ mtAgg2[mtAgg2$Group.2 == "C",1])
+wilcox.test(mtAgg2[mtAgg2$Group.2 == "C",5] ~ mtAgg2[mtAgg2$Group.2 == "C",1])
+```
+
+
+####################################################
+######Rep 3 ########################################
+####################################################
+```{r}
+spike3 <- read_excel(path = "harvesting rep 3.xlsx", sheet = 2)
+
+
+spike3$Chamber <- as.factor(spike3$Chamber)
+spike3$Plant <- as.factor(spike3$Plant)
+
+spike3$single <- paste(spike3$Line, spike3$BL, spike3$HeatStress, spike3$Plant, spike3$Spike, sep = "_")
+```
+
+###simpler Vida
+```{r}
+vida3 <- spike3[spike3$Line =="Vida",]
+vidaAgg3<- aggregate(vida3$Spike, by = list(vida3$HeatStress, vida3$BL, vida3$Plant, vida3$Spike), FUN= length)
+par(mar = c(5,5,2,2))
+
+boxplot(vidaAgg3[vidaAgg3$Group.2 == "C",5] ~ vidaAgg3[vidaAgg3$Group.2 == "C",1], xlab = "heat stress",
+        ylab = "spikelet number per head", col = c("blue", "orange"), 
+        cex.lab=2, names.arg = 2, las = 2, xaxt="n", yaxt="n",
+        ylim = c(0,25), , main = "Rep 3")
+axis(1, at=c(1,2), labels=c("22 degrees", "29 degrees"), cex.axis=1.7)
+axis(2, at=c(0:25), labels=0:25, cex.axis=1, las = 2)
+```
+
+```{r}
+leveneTest(vidaAgg3[vidaAgg3$Group.2 == "C",5] ~ vidaAgg3[vidaAgg3$Group.2 == "C",1])
+wilcox.test(vidaAgg3[vidaAgg3$Group.2 == "C",5] ~ vidaAgg3[vidaAgg3$Group.2 == "C",1])
+```
+
+```{r}
+hiline3<-spike3[spike3$Line =="Hiline",]
+hilAgg3<- aggregate(hiline3$Spike, by = list(hiline3$HeatStress, hiline3$BL, hiline3$Plant, hiline3$Spike), FUN= length)
+
+par(mfrow = c(1,3))
+par(mar = c(5,5,2,2))
+boxplot(hilAgg3[hilAgg3$Group.2 == "C",5] ~ hilAgg3[hilAgg3$Group.2 == "C",1], xlab = "heat stress",
+        ylab = "spikelet number per head", col = c("blue", "orange"), 
+        cex.lab=2, names.arg = 2, las = 2, xaxt="n", yaxt="n",
+        ylim = c(0,25), main = "Rep 1")
+axis(1, at=c(1,2), labels=c("22 degrees", "29 degrees"), cex.axis=1.7)
+axis(2, at=c(0:25), labels=0:25, cex.axis=1, las = 2)
+```
+
+```{r}
+leveneTest(hilAgg3[hilAgg3$Group.2 == "C",5] ~ hilAgg3[hilAgg3$Group.2 == "C",1])
+wilcox.test(hilAgg3[hilAgg3$Group.2 == "C",5] ~ hilAgg3[hilAgg3$Group.2 == "C",1])
+```
+
+```{r}
+mth3<-spike3[spike3$Line =="MTH",]
+mtAgg3<- aggregate(mth3$Spike, by = list(mth3$HeatStress, mth3$BL, mth3$Plant, mth3$Spike), FUN= length)
+
+par(mfrow = c(1,3))
+par(mar = c(5,5,2,2))
+boxplot(mtAgg3[mtAgg3$Group.2 == "C",5] ~ mtAgg3[hilAgg3$Group.2 == "C",1], xlab = "heat stress",
+        ylab = "spikelet number per head", col = c("blue", "orange"), 
+        cex.lab=2, names.arg = 2, las = 2, xaxt="n", yaxt="n",
+        ylim = c(0,25), main = "Rep 1")
+axis(1, at=c(1,2), labels=c("22 degrees", "29 degrees"), cex.axis=1.7)
+axis(2, at=c(0:25), labels=0:25, cex.axis=1, las = 2)
+```
+
+```{r}
+leveneTest(mtAgg3[mtAgg3$Group.2 == "C",5] ~ mtAgg3[mtAgg3$Group.2 == "C",1])
+wilcox.test(mtAgg3[mtAgg3$Group.2 == "C",5] ~ mtAgg3[mtAgg3$Group.2 == "C",1])
+```
+
+##########
+
+```{r}
+par(mfrow = c(1,3))
+par(mar = c(5,5,2,2))
+boxplot(hilAgg[hilAgg$Group.2 == "C",5] ~ hilAgg[hilAgg$Group.2 == "C",1], xlab = "heat stress",
+        ylab = "spikelet number per head", col = c("blue", "orange"), 
+        cex.lab=2, names.arg = 2, las = 2, xaxt="n", yaxt="n",
+        ylim = c(0,25), main = "Rep 1")
+axis(1, at=c(1,2), labels=c("22 degrees", "29 degrees"), cex.axis=1.7)
+axis(2, at=c(0:25), labels=0:25, cex.axis=1, las = 2)
+boxplot(hilAgg2[hilAgg2$Group.2 == "C",5] ~ hilAgg2[hilAgg2$Group.2 == "C",1], xlab = "heat stress",
+        ylab = "spikelet number per head", col = c("blue", "orange"), 
+        cex.lab=2, names.arg = 2, las = 2, xaxt="n", yaxt="n",
+        ylim = c(0,25), main = "Rep 1")
+axis(1, at=c(1,2), labels=c("22 degrees", "29 degrees"), cex.axis=1.7)
+axis(2, at=c(0:25), labels=0:25, cex.axis=1, las = 2)
+boxplot(hilAgg3[hilAgg3$Group.2 == "C",5] ~ hilAgg3[hilAgg3$Group.2 == "C",1], xlab = "heat stress",
+        ylab = "spikelet number per head", col = c("blue", "orange"), 
+        cex.lab=2, names.arg = 2, las = 2, xaxt="n", yaxt="n",
+        ylim = c(0,25), main = "Rep 1")
+axis(1, at=c(1,2), labels=c("22 degrees", "29 degrees"), cex.axis=1.7)
+axis(2, at=c(0:25), labels=0:25, cex.axis=1, las = 2)
+```
+
+```{r}
+par(mfrow = c(1,3))
+par(mar = c(5,5,2,2))
+boxplot(mtAgg[mtAgg$Group.2 == "C",5] ~ mtAgg[mtAgg$Group.2 == "C",1], xlab = "heat stress",
+        ylab = "spikelet number per head", col = c("blue", "orange"), 
+        cex.lab=2, names.arg = 2, las = 2, xaxt="n", yaxt="n",
+        ylim = c(0,25), main = "Rep 1")
+axis(1, at=c(1,2), labels=c("22 degrees", "29 degrees"), cex.axis=1.7)
+axis(2, at=c(0:25), labels=0:25, cex.axis=1, las = 2)
+boxplot(mtAgg2[mtAgg2$Group.2 == "C",5] ~ mtAgg2[mtAgg2$Group.2 == "C",1], xlab = "heat stress",
+        ylab = "spikelet number per head", col = c("blue", "orange"), 
+        cex.lab=2, names.arg = 2, las = 2, xaxt="n", yaxt="n",
+        ylim = c(0,25), main = "Rep 2")
+axis(1, at=c(1,2), labels=c("22 degrees", "29 degrees"), cex.axis=1.7)
+axis(2, at=c(0:25), labels=0:25, cex.axis=1, las = 2)
+boxplot(mtAgg3[mtAgg3$Group.2 == "C",5] ~ mtAgg3[mtAgg3$Group.2 == "C",1], xlab = "heat stress",
+        ylab = "spikelet number per head", col = c("blue", "orange"), 
+        cex.lab=2, names.arg = 2, las = 2, xaxt="n", yaxt="n",
+        ylim = c(0,25), main = "Rep 3")
+axis(1, at=c(1,2), labels=c("22 degrees", "29 degrees"), cex.axis=1.7)
+axis(2, at=c(0:25), labels=0:25, cex.axis=1, las = 2)
+```
+
+
+
+
+
+#####SEED TREATMENT#####
+
+####################################################
+######Rep 1 ########################################
+####################################################
+```{r}
+spike <- read_excel(path = "/Users/jenniferlachowiec/Dropbox/Montana State/projects/Aish/harvesting rep 1.xlsx", sheet = 3)
+head(spike)
+
+spike$Chamber <- as.factor(spike$Chamber)
+spike$Plant <- as.factor(spike$Plant)
+
+spike$single <- paste(spike$Line, spike$BL, spike$HeatStress, spike$Plant, spike$Spike, sep = "_")
+```
+
+###simpler Vida
+```{r}
+head(spike)
+vida <- spike[spike$Line =="Vida",]
+vidaAgg<- aggregate(vida$Spike, by = list(vida$HeatStress, vida$BL, vida$Plant, vida$Spike), FUN= length)
+
+par(mfrow = c(1,3))
+par(mar = c(5,5,2,2))
+boxplot(vidaAgg[vidaAgg$Group.2 == "S",5] ~ vidaAgg[vidaAgg$Group.2 == "S",1], xlab = "heat stress",
+        ylab = "spikelet number per head", col = c("blue", "orange"), 
+        cex.lab=2, names.arg = 2, las = 2, xaxt="n", yaxt="n",
+        ylim = c(0,25), main = "Rep 1")
+axis(1, at=c(1,2), labels=c("22 degrees", "29 degrees"), cex.axis=1.7)
+axis(2, at=c(0:25), labels=0:25, cex.axis=1, las = 2)
+```
+
+```{r}
+leveneTest(vidaAgg[vidaAgg$Group.2 == "S",5] ~ vidaAgg[vidaAgg$Group.2 == "S",1])
+wilcox.test(vidaAgg[vidaAgg$Group.2 == "S",5] ~ vidaAgg[vidaAgg$Group.2 == "S",1])
+```
+
+####################################################
+######Rep 2 ########################################
+####################################################
+```{r}
+spike <- read_excel(path = "/Users/jenniferlachowiec/Dropbox/Montana State/projects/Aish/harvesting rep 2.xlsx", sheet = 2)
+head(spike)
+
+spike$Chamber <- as.factor(spike$Chamber)
+spike$Plant <- as.factor(spike$Plant)
+
+spike$single <- paste(spike$Line, spike$BL, spike$HeatStress, spike$Plant, spike$Spike, sep = "_")
+```
+
+###simpler Vida
+head(spike)
+vida <- spike[spike$Line =="Vida",]
+vidaAgg<- aggregate(vida$Spike, by = list(vida$HeatStress, vida$BL, vida$Plant, vida$Spike), FUN= length)
+par(mar = c(5,5,2,2))
+
+boxplot(vidaAgg[vidaAgg$Group.2 == "S",5] ~ vidaAgg[vidaAgg$Group.2 == "S",1], xlab = "heat stress",
+        ylab = "spikelet number per head", col = c("blue", "orange"), 
+        cex.lab=2, names.arg = 2, las = 2, xaxt="n", yaxt="n",
+        ylim = c(0,25), main = "Rep 2")
+axis(1, at=c(1,2), labels=c("22 degrees", "29 degrees"), cex.axis=1.7)
+axis(2, at=c(0:25), labels=0:25, cex.axis=1, las = 2)
+
+
+
+leveneTest(vidaAgg[vidaAgg$Group.2 == "S",5] ~ vidaAgg[vidaAgg$Group.2 == "S",1])
+wilcox.test(vidaAgg[vidaAgg$Group.2 == "S",5] ~ vidaAgg[vidaAgg$Group.2 == "S",1])
+
+
+
+
+####################################################
+######Rep 3 ########################################
+####################################################
+
+spike <- read_excel(path = "/Users/jenniferlachowiec/Dropbox/Montana State/projects/Aish/harvesting rep 3.xlsx", sheet = 2)
+head(spike)
+
+spike$Chamber <- as.factor(spike$Chamber)
+spike$Plant <- as.factor(spike$Plant)
+
+spike$single <- paste(spike$Line, spike$BL, spike$HeatStress, spike$Plant, spike$Spike, sep = "_")
+
+
+###simpler Vida
+head(spike)
+vida <- spike[spike$Line =="Vida",]
+vidaAgg<- aggregate(vida$Spike, by = list(vida$HeatStress, vida$BL, vida$Plant, vida$Spike), FUN= length)
+par(mar = c(5,5,2,2))
+
+boxplot(vidaAgg[vidaAgg$Group.2 == "S",5] ~ vidaAgg[vidaAgg$Group.2 == "S",1], xlab = "heat stress",
+        ylab = "spikelet number per head", col = c("blue", "orange"), 
+        cex.lab=2, names.arg = 2, las = 2, xaxt="n", yaxt="n",
+        ylim = c(0,25), , main = "Rep 3")
+axis(1, at=c(1,2), labels=c("22 degrees", "29 degrees"), cex.axis=1.7)
+axis(2, at=c(0:25), labels=0:25, cex.axis=1, las = 2)
+
+
+
+leveneTest(vidaAgg[vidaAgg$Group.2 == "S",5] ~ vidaAgg[vidaAgg$Group.2 == "S",1])
+wilcox.test(vidaAgg[vidaAgg$Group.2 == "S",5] ~ vidaAgg[vidaAgg$Group.2 == "S",1])
+
+```{r}
+par(mfrow = c(1,3))
+par(mar = c(5,5,2,2))
+boxplot(mtAgg[mtAgg$Group.2 == "S",5] ~ mtAgg[mtAgg$Group.2 == "S",1], xlab = "heat stress",
+        ylab = "spikelet number per head", col = c("blue", "orange"), 
+        cex.lab=2, names.arg = 2, las = 2, xaxt="n", yaxt="n",
+        ylim = c(0,25), main = "Rep 1")
+axis(1, at=c(1,2), labels=c("22 degrees", "29 degrees"), cex.axis=1.7)
+axis(2, at=c(0:25), labels=0:25, cex.axis=1, las = 2)
+boxplot(mtAgg2[mtAgg2$Group.2 == "S",5] ~ mtAgg2[mtAgg2$Group.2 == "S",1], xlab = "heat stress",
+        ylab = "spikelet number per head", col = c("blue", "orange"), 
+        cex.lab=2, names.arg = 2, las = 2, xaxt="n", yaxt="n",
+        ylim = c(0,25), main = "Rep 2")
+axis(1, at=c(1,2), labels=c("22 degrees", "29 degrees"), cex.axis=1.7)
+axis(2, at=c(0:25), labels=0:25, cex.axis=1, las = 2)
+boxplot(mtAgg3[mtAgg3$Group.2 == "S",5] ~ mtAgg3[mtAgg3$Group.2 == "S",1], xlab = "heat stress",
+        ylab = "spikelet number per head", col = c("blue", "orange"), 
+        cex.lab=2, names.arg = 2, las = 2, xaxt="n", yaxt="n",
+        ylim = c(0,25), main = "Rep 3")
+axis(1, at=c(1,2), labels=c("22 degrees", "29 degrees"), cex.axis=1.7)
+axis(2, at=c(0:25), labels=0:25, cex.axis=1, las = 2)
+```
+
+####################################################
+##############################################
+####################################################
+
+#####fertility--grain per floret######
+####fertility rep1####
+```{r}
+spike <- read_excel(path = "/Users/jenniferlachowiec/Dropbox/Montana State/projects/Aish/harvesting rep 1.xlsx", sheet = 3)
+head(spike)
+
+spike$Chamber <- as.factor(spike$Chamber)
+spike$Plant <- as.factor(spike$Plant)
+
+spike$single <- paste(spike$Line, spike$BL, spike$HeatStress, spike$Plant, spike$Spike, sep = "_")
+```
+
+```{r}
+spike$fert <- spike$GrainNo./spike$Floret
+vidaf <- spike[spike$Line =="Vida",]
+vf<- aggregate(vidaf$fert, by = list(vidaf$HeatStress, vidaf$BL, vidaf$Plant, vidaf$Spike), FUN= mean)
+names(vf) <- c("Heat", "BL", "Plant", "Spike", "Fertility")
+vf$Plant <- as.factor(vf$Plant)
+vf$Spike <- as.factor(vf$Spike)
+
+par(mfrow = c(1,1))
+boxplot(vf$Fertility ~ vf$Heat + vf$BL, col = c("blue", "orange"))
+```
+
+
+```{r}
+mod0 <- lmer(log(Fertility+0.01) ~ BL * Heat + (1|Spike/Plant), data = vidaAgg )
+plot(mod0)
+Anova(mod0)
+eem <- emmeans(mod0, c("Heat", "BL"))
+plot(eem)
+```
+
+####fertility rep2####
+```{r}
+spike <- read_excel(path = "/Users/jenniferlachowiec/Dropbox/Montana State/projects/Aish/harvesting rep 2.xlsx", sheet = 2)
+head(spike)
+
+spike$Chamber <- as.factor(spike$Chamber)
+spike$Plant <- as.factor(spike$Plant)
+
+spike$single <- paste(spike$Line, spike$BL, spike$HeatStress, spike$Plant, spike$Spike, sep = "_")
+```
+
+```{r}
+spike$fert <- spike$GrainNo./spike$Floret
+vida <- spike[spike$Line =="Vida",]
+vidaAgg<- aggregate(vida$fert, by = list(vida$HeatStress, vida$BL, vida$Plant, vida$Spike), FUN= mean)
+head(vidaAgg)
+names(vidaAgg) <- c("Heat", "BL", "Plant", "Spike", "Fertility")
+vidaAgg$Plant <- as.factor(vidaAgg$Plant)
+vidaAgg$Spike <- as.factor(vidaAgg$Spike)
+
+par(mfrow = c(1,1))
+boxplot(vidaAgg$Fertility ~ vidaAgg$Heat + vidaAgg$BL, col = c("blue", "orange"))
+```
+
+```{r}
+mod0 <- lmer(log(Fertility+0.01) ~ BL * Heat + (1|Spike/Plant), data = vidaAgg )
+plot(mod0)
+Anova(mod0)
+eem <- emmeans(mod0, c("Heat", "BL"))
+plot(eem)
+```
+
+####fertility rep3####
+```{r}
+spike <- read_excel(path = "/Users/jenniferlachowiec/Dropbox/Montana State/projects/Aish/harvesting rep 3.xlsx", sheet = 2)
+head(spike)
+
+spike$Chamber <- as.factor(spike$Chamber)
+spike$Plant <- as.factor(spike$Plant)
+
+spike$single <- paste(spike$Line, spike$BL, spike$HeatStress, spike$Plant, spike$Spike, sep = "_")
+```
+
+```{r}
+spike$fert <- spike$GrainNo./spike$Floret
+vida <- spike[spike$Line =="Vida",]
+vidaAgg<- aggregate(vida$fert, by = list(vida$HeatStress, vida$BL, vida$Plant, vida$Spike), FUN= mean)
+head(vidaAgg)
+names(vidaAgg) <- c("Heat", "BL", "Plant", "Spike", "Fertility")
+vidaAgg$Plant <- as.factor(vidaAgg$Plant)
+vidaAgg$Spike <- as.factor(vidaAgg$Spike)
+
+par(mfrow = c(1,1))
+boxplot(vidaAgg$Fertility ~ vidaAgg$Heat + vidaAgg$BL, col = c("blue", "orange"))
+```
+
+```{r}
+mod0 <- lmer(log(Fertility+0.01) ~ BL * Heat + (1|Spike/Plant), data = vidaAgg )
+plot(mod0)
+Anova(mod0)
+eem <- emmeans(mod0, c("Heat", "BL"))
+plot(eem)
+```

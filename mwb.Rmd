@@ -1,0 +1,1091 @@
+---
+title: "all reps combined"
+output:
+  word_document: default
+  html_document:
+    df_print: paged
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+```{r}
+suppressMessages(library(readxl))
+suppressMessages(library(car))
+suppressMessages(library(mosaic))
+suppressMessages(library(yarrr))
+suppressMessages(library(lmerTest))
+suppressMessages(library(emmeans))
+suppressMessages(library(effects))
+suppressMessages(library(ggplot2))
+suppressMessages(library(Rmisc))
+suppressMessages(library(multcomp))
+```
+
+```{r}
+mwb1<-read_excel("combined reps.xlsx", sheet=1)
+
+mwb1$Variety<-factor(mwb1$Variety)
+mwb1$BL<-factor(mwb1$BL)
+mwb1$HeatStress<-factor(mwb1$HeatStress)
+mwb1$Rep<-factor(mwb1$Rep)
+```
+
+
+```{r, fig.width=11}
+pirateplot(PlantHeight~Variety+BL, data=mwb1, inf.method="ci",cex.names=0.8)
+```
+
+Graph of plant height vs all varieties and treatments, mixing both heat stress and control. 
+
+```{r}
+pirateplot(PlantHeight~Variety +Rep, data=mwb1, inf.method="ci",cex.names=0.8)
+```
+
+
+Pooling Vida only 
+```{r}
+vida <- mwb1[mwb1$Variety == "Vida",]
+newdata1<-vida
+```
+
+```{r}
+pirateplot(vida$PlantHeight ~ vida$BL + vida$HeatStress + vida$Rep , data=mwb1)
+```
+
+In all reps, heat stress overall reduced plant height. 
+In rep 1: D,F,H had taller plants than C under heat stress. In control plants (no HS), BL did not seem to have a positive effect on plant height; C treatment plants were taller. 
+In rep 2: S had taller plants than C in both HS and no HS. In no HS: F and H had taller plants than C. In HS: all BL treatments had taller plants than C
+In rep 3: D,S had taller plants than C in HS. 
+
+```{r}
+pirateplot(vida$PlantHeight ~ vida$BL +  vida$Rep,inf.method="ci" , data=mwb1)
+```
+
+```{r}
+pirateplot(vida$PlantHeight ~ vida$HeatStress + vida$Rep,inf.method="ci" , data=mwb1)
+```
+
+In all 3 reps, HS reduced plant height. But, reps 2 and 3 had less reduction in height compared to rep 1.
+
+```{r}
+pirateplot(vida$PlantHeight ~ vida$Rep,inf.method="ci" , data=mwb1)
+```
+
+```{r}
+pirateplot(vida$TillerNumber ~ vida$BL + vida$HeatStress + vida$Rep , data=mwb1)
+```
+
+Can't say a lot about tiller number, it is inconclusive. 
+
+```{r}
+pirateplot(vida$TillerNumber ~ vida$BL +  vida$Rep,inf.method="ci" , data=mwb1)
+```
+
+```{r}
+pirateplot(vida$TillerNumber ~ vida$HeatStress + vida$Rep,inf.method="ci" , data=mwb1)
+```
+
+HS reduced tiller number in reps 1 and 3. 
+
+```{r}
+pirateplot(vida$TillerNumber ~ vida$Rep,inf.method="ci" , data=mwb1)
+```
+
+
+```{r, fig.width=9, fig.align='center', fig.height=6}
+pirateplot(PlantHeight ~ BL + HeatStress+Rep,xlab="Treatment", ylab="Plant height",inf.method="ci",data=mwb1)
+```
+
+```{r}
+pirateplot(PlantHeight ~ Rep, ylab="Plant height",inf.method="ci",data=mwb1)
+```
+
+```{r}
+pirateplot(PlantHeight ~ HeatStress+ Variety+Rep , data=mwb1,inf.method="ci",ylab="plant height")
+```
+
+```{r}
+pirateplot(PlantHeight ~ BL+ Variety+Rep , data=mwb1,ylab="plant height")
+
+```
+
+
+
+```{r}
+pirateplot(TillerNumber ~ BL + HeatStress+Rep,data=mwb1,inf.method="ci")
+pirateplot(TillerNumber ~ Variety + HeatStress+Rep,data=mwb1,inf.method="ci", cex.names = 0.7)
+
+```
+
+```{r,fig.width=11}
+pirateplot(TillerNumber ~ Variety + Rep + BL, data=mwb1, cex.names=0.8,cex.lab = 0.8)
+```
+
+```{r}
+m0<-lmer(PlantHeight~BL*HeatStress+(1|Rep)+(1|Chamber), data=newdata1)
+Anova(m0)
+summary(m0)
+```
+
+
+```{r}
+control <- mwb1[mwb1$Variety == "Vida"& mwb1$BL == "C",]
+seed <- mwb1[mwb1$Variety == "Vida"& mwb1$BL == "S",]
+newdata<-rbind(control,seed)
+
+##newdata<-newdata[-c(39),]
+```
+
+```{r}
+pirateplot(PlantHeight~BL+HeatStress+Rep, data=newdata,cex.names=0.8, ylim=c(30,80))
+```
+
+```{r}
+pairs(~PlantHeight+HeatStress+BL, data=newdata)
+```
+
+
+```{r}
+boxplot(PlantHeight~BL+HeatStress+Rep, data=newdata,cex.names=0.8)
+
+```
+
+```{r}
+pirateplot(TillerNumber~BL+HeatStress+Rep, data=newdata,cex.names=0.8)
+
+```
+
+
+
+```{r}
+m1<-lmer(PlantHeight~BL*HeatStress+(1|Rep), data=newdata1)
+Anova(m1)
+summary(m1)
+```
+
+Only rep as random effect.  C, D Heat stress (HS), D*HS are significantly different 
+
+
+
+```{r}
+suppressMessages(library(xtable))
+```
+
+
+```{r}
+m2<-lmer(PlantHeight~BL*HeatStress+(1|Rep)+(1|Chamber), data=newdata1)
+Anova(m2, test.statistic = "F")
+summary(m2)
+
+
+
+##m12<-lmer(PlantHeight~BL*HeatStress+(1|Chamber)+(1|Rep), data=newdata1)
+##m13<-lmer(PlantHeight~BL*HeatStress+(1|Chamber/Rep), data=newdata1)
+
+```
+
+model2<-summary(m2)$coefficients
+out1<-xtable(model2)
+out1
+capture.output(model2, file="PH.xlxs")
+
+
+```{r}
+newdata1$treat<-with(newdata1, interaction(BL,HeatStress))
+```
+
+```{r}
+model<-lmer(PlantHeight~treat+(1|Rep)+(1|Chamber), data=newdata1)
+Anova(model)
+```
+
+```{r}
+trt<-glht(model,linfct=mcp(treat="Tukey"))
+summary(trt)
+confint(trt)
+```
+
+```{r}
+cld(trt)
+```
+
+
+```{r}
+emmeans(m2, pairwise~BL|HeatStress)
+```
+
+
+```{r}
+a<-emmeans(m2, c("BL", "HeatStress"))
+emmip(m2,BL~HeatStress, CIs=TRUE)
+emmip(m2,BL~HeatStress)
+plot(a, comparison=T)
+
+```
+
+```{r}
+suppressMessages(library(multcompView))
+cld(a)
+```
+
+
+
+```{r}
+suppressMessages(library(multcomp))
+trts<-glht(m2, linfct=mcp("BL"="Tukey","HeatStress"="Tukey"))
+summary(trts)
+confint(trts)
+```
+
+
+It doesn't matter which way I do random effects, it gives me the same result. 
+
+Both rep and chamber as random effects. C, D*HS are significantly different. Maybe S shows little difference (p-value=0.5)
+
+
+
+
+```{r}
+m3<-lmer(PlantHeight~BL*HeatStress+(1|Rep)+(1|Chamber), data=newdata)
+Anova(m3, test.statistic = "F")
+summary(m3)
+mean1<-emmeans(m3, c("BL","HeatStress"))
+mean1
+```
+S, S*HS significantly different (after removing the outlier in Rep 2) 
+
+```{r}
+m<-emmeans(m3, c("BL", "HeatStress"))
+emmip(m3,BL~HeatStress, CIs=TRUE)
+emmip(m3,BL~HeatStress)
+plot(m, comparison=T)
+```
+
+
+
+nd$treat<-with(nd, interaction(BL,HeatStress))
+
+model2<-lmer(SpikeLength~treat+(1|Rep)+(1|Chamber), data=nd)
+
+trt11<-glht(m3,linfct=mcp(treat="Tukey"))
+summary(trt11)
+confint(trt11)
+
+
+
+calc_se<-summarySE(newdata, measurevar="PlantHeight", groupvars=c("BL","HeatStress"))
+calc_se
+pd <- position_dodge(0.1) # move them .05 to the left and right
+ggplot(calc_se, aes(x=HeatStress, y=PlantHeight, group=BL))+
+  geom_errorbar(aes(ymin=PlantHeight-sd, ymax=PlantHeight+sd),width=0.1, position=pd)+
+  geom_line(aes(linetype=BL), position=pd)+
+  geom_point(position=pd)
+
+
+
+ggplot(tgc, aes(x=dose, y=len, colour=supp)) + 
+    geom_errorbar(aes(ymin=len-se, ymax=len+se), width=.1) +
+    geom_line() +
+    geom_point()
+
+```{r}
+library(predictmeans)
+residplot(m3, newwd=F)
+residplot(m2,newwd=F)
+```
+
+
+
+
+```{r}
+
+PHforplot<-data.frame(mean1)
+
+
+#write.csv(PHforplot,'C:/Users/r31j968/OneDrive - Montana State University - Bozeman/Documents/R analysis/PHforplot.csv', row.names = TRUE)
+
+
+```
+
+```{r}
+emmip(m3,BL~HeatStress, CIs=TRUE)
+```
+
+```{r, fig.width=11}
+plot(mean1, comparison=T)
+```
+
+
+```{r, fig.width=11}
+source("http://www.math.montana.edu/courses/s217/documents/intplotfunctions_v2.R")
+intplotarray(PlantHeight~BL*HeatStress, data=newdata)
+```
+
+
+```{r, fig.width=11}
+intplotarray(PlantHeight~BL*HeatStress, data=newdata1)
+
+```
+
+```{r, fig.width=11}
+intplotarray(emmean~BL*HeatStress, data=PHforplot)
+
+```
+
+```{r}
+interaction.plot(x.factor = PHforplot$'HeatStress', trace.factor = PHforplot$'BL', response = PHforplot$'emmean',  lwd = 5, fun = function(x) mean(x, na.rm = TRUE), xlab="heat stress", ylab="plant height")
+```
+
+
+
+```{r}
+plot(allEffects(m3), multiline=T, grid=T, ci.style="bars")
+```
+
+
+
+```{r}
+Anova(m3, test.statistic = "F")
+anova(m3, type="II")
+```
+Can use either method, both give similar results. 
+
+```{r}
+m4<-lmer(PlantHeight~BL+HeatStress+(1|Rep)+(1|Chamber), data=newdata)
+Anova(m4, test.statistic = "F")
+summary(m4)
+```
+
+```{r}
+anova(m4, m3)
+```
+So, there is some interaction between BL and heat stress, so keep the interaction term in the model. 
+
+
+
+
+
+Hiline
+
+```{r}
+hiline <- mwb1[mwb1$Variety == "Hiline",]
+Hil<-hiline
+
+pirateplot(hiline$PlantHeight ~ hiline$BL + hiline$HeatStress + hiline$Rep , data=mwb1)
+```
+
+
+```{r}
+pirateplot(hiline$PlantHeight ~ hiline$BL +  hiline$Rep,inf.method="ci" , data=mwb1)
+```
+
+
+```{r}
+pirateplot(hiline$PlantHeight ~ hiline$HeatStress + hiline$Rep,inf.method="ci" , data=mwb1)
+```
+
+
+```{r}
+pirateplot(hiline$PlantHeight ~ hiline$Rep,inf.method="ci" , data=mwb1)
+```
+
+
+```{r}
+controlH <- mwb1[mwb1$Variety == "Hiline"& mwb1$BL == "C",]
+seedH <- mwb1[mwb1$Variety == "Hiline"& mwb1$BL == "S",]
+newdata2<-rbind(controlH,seedH)
+```
+
+```{r}
+pirateplot(PlantHeight~BL+HeatStress+Rep, data=newdata2,cex.names=0.8, ylim=c(25,60))
+```
+
+```{r}
+pirateplot(TillerNumber~BL+HeatStress+Rep, data=newdata2,cex.names=0.8)
+
+```
+
+```{r}
+m19<-lmer(PlantHeight~BL*HeatStress+(1|Rep)+(1|Chamber), data=Hil)
+Anova(m19, test.statistic = "F")
+```
+
+```{r}
+m20<-lmer(PlantHeight~BL+HeatStress+(1|Rep)+(1|Chamber), data=Hil)
+Anova(m20, test.statistic = "F")
+summary(m20)
+```
+
+```{r, fig.width=11}
+intplotarray(PlantHeight~BL*HeatStress, data=Hil)
+
+```
+
+```{r}
+b<-emmeans(m20, c("BL", "HeatStress"))
+emmip(m20,BL~HeatStress, CIs=TRUE)
+emmip(m20,BL~HeatStress)
+plot(b, comparison=T)
+```
+
+```{r}
+Hil$treat<-with(Hil, interaction(BL,HeatStress))
+
+model1<-lmer(PlantHeight~treat+(1|Rep)+(1|Chamber), data=Hil)
+
+trt<-glht(model1,linfct=mcp(treat="Tukey"))
+summary(trt)
+confint(trt)
+```
+
+```{r}
+m5<-lmer(PlantHeight~BL+HeatStress+(1|Rep)+(1|Chamber), data=newdata2)
+Anova(m5, test.statistic = "F")
+summary(m5)
+```
+
+
+```{r}
+m6<-lmer(PlantHeight~BL*HeatStress+(1|Rep)+(1|Chamber), data=newdata2)
+Anova(m6, test.statistic = "F")
+summary(m6)
+```
+
+```{r}
+mean3<-emmeans(m6,c("BL","HeatStress"))
+PHforplot2<-data.frame(mean3)
+
+
+#write.csv(PHforplot2,'C:/Users/r31j968/OneDrive - Montana State University - Bozeman/Documents/R analysis/PHforplot2.csv', row.names = TRUE)
+
+emmip(m6,BL~HeatStress, CIs=TRUE)
+```
+
+
+
+MTH
+
+
+```{r}
+mth <- mwb1[mwb1$Variety == "MTH",]
+MT<-mth
+
+pirateplot(mth$PlantHeight ~ mth$BL + mth$HeatStress + mth$Rep , data=mwb1)
+```
+
+
+```{r}
+pirateplot(mth$PlantHeight ~ mth$BL +  mth$Rep,inf.method="ci" , data=mwb1)
+```
+
+
+```{r}
+pirateplot(mth$PlantHeight ~ mth$HeatStress + mth$Rep,inf.method="ci" , data=mwb1)
+```
+
+
+```{r}
+pirateplot(mth$PlantHeight ~ mth$Rep,inf.method="ci" , data=mwb1)
+```
+
+
+```{r}
+controlM <- mwb1[mwb1$Variety == "MTH"& mwb1$BL == "C",]
+seedM <- mwb1[mwb1$Variety == "MTH"& mwb1$BL == "S",]
+newdata4<-rbind(controlM,seedM)
+```
+
+```{r}
+pirateplot(PlantHeight~BL+HeatStress+Rep, data=newdata4,cex.names=0.8, ylim=c(30,75))
+```
+
+```{r}
+pirateplot(TillerNumber~BL+HeatStress+Rep, data=newdata4,cex.names=0.8)
+
+```
+
+```{r}
+m21<-lmer(PlantHeight~BL+HeatStress+(1|Rep)+(1|Chamber), data=MT)
+Anova(m21, test.statistic = "F")
+summary(m21)
+```
+
+```{r, fig.width=11}
+intplotarray(PlantHeight~BL*HeatStress, data=MT)
+
+```
+
+```{r}
+c<-emmeans(m21, c("BL", "HeatStress"))
+emmip(m21,BL~HeatStress, CIs=TRUE)
+emmip(m21,BL~HeatStress)
+plot(c, comparison=T)
+```
+
+```{r}
+Hil$treat<-with(Hil, interaction(BL,HeatStress))
+
+model1<-lmer(PlantHeight~treat+(1|Rep)+(1|Chamber), data=Hil)
+
+trt<-glht(model1,linfct=mcp(treat="Tukey"))
+summary(trt)
+confint(trt)
+```
+
+```{r}
+m7<-lmer(PlantHeight~BL+HeatStress+(1|Rep)+(1|Chamber), data=newdata4)
+Anova(m7, test.statistic = "F")
+summary(m7)
+```
+
+
+```{r}
+m8<-lmer(PlantHeight~BL*HeatStress+(1|Rep)+(1|Chamber), data=newdata4)
+Anova(m8, test.statistic = "F")
+summary(m8)
+```
+
+
+```{r}
+mean4<-emmeans(m7,c("BL","HeatStress"))
+PHforplot3<-data.frame(mean4)
+
+
+#write.csv(PHforplot3,'C:/Users/r31j968/OneDrive - Montana State University - Bozeman/Documents/R analysis/PHforplot3.csv', row.names = TRUE)
+
+emmip(m7,BL~HeatStress, CIs=TRUE)
+```
+
+
+Interaction plots
+
+
+```{r}
+
+interaction.plot(x.factor = vida$`HeatStress`, trace.factor = vida$BL, response = vida$`PlantHeight`, col = rainbow(5), lwd = 5, fun = function(x) mean(x, na.rm = TRUE), xlab="heat stress", ylab="plant height")
+
+interaction.plot(x.factor = as.factor(vida$Chamber), trace.factor = vida$BL, response = vida$`PlantHeight`, col = rainbow(5), lwd = 5, fun = function(x) mean(x, na.rm = TRUE), xlab="chamber", ylab="plant height")
+```
+
+
+```{r}
+
+interaction.plot(x.factor = hiline$`HeatStress`, trace.factor = hiline$BL, response = hiline$`PlantHeight`, col = rainbow(5), lwd = 5, fun = function(x) mean(x, na.rm = TRUE), xlab="heat stress", ylab="plant height")
+```
+
+```{r}
+
+interaction.plot(x.factor = mth$`HeatStress`, trace.factor = mth$BL, response = mth$`PlantHeight`, col = rainbow(5), lwd = 5, fun = function(x) mean(x, na.rm = TRUE), xlab="heat stress", ylab="plant height")
+
+```
+
+
+
+Spike length - vida
+
+```{r}
+mwb3<-read_excel("combined reps.xlsx", sheet=3)
+
+mwb3$Line<-factor(mwb3$Line)
+mwb3$BL<-factor(mwb3$BL)
+mwb3$HeatStress<-factor(mwb3$HeatStress)
+mwb3$Rep<-factor(mwb3$Rep)
+```
+
+
+```{r, fig.width=8}
+pirateplot(SpikeLength ~ Line + HeatStress+Rep, data=mwb3,inf.method="ci")
+
+pirateplot(SpikeLength ~ BL+ Line + HeatStress , data=mwb3)
+
+pirateplot(SpikeLength ~ BL+ HeatStress+Rep , data=mwb3,inf.method="ci")
+```
+
+
+```{r}
+vidaSL<-mwb3[mwb3$Line == "Vida",]
+nd<-vidaSL
+controlv2 <- mwb3[mwb3$Line == "Vida"& mwb3$BL == "C",]
+seedv2 <- mwb3[mwb3$Line == "Vida"& mwb3$BL == "S",]
+newdata7<-rbind(controlv2,seedv2)
+```
+
+
+```{r}
+pirateplot(SpikeLength ~ BL+ HeatStress+Rep , data=newdata7,inf.method="ci")
+```
+
+```{r}
+m18<-lmer(SpikeLength ~ HeatStress + BL+(1|Rep)+(1|Chamber), data=nd)
+Anova(m18, test.statistic = "F")
+summary(m18)
+```
+
+```{r, fig.width=11}
+intplotarray(SpikeLength~BL*HeatStress, data=nd)
+
+```
+
+```{r}
+d<-emmeans(m18, c("BL", "HeatStress"))
+emmip(m18,BL~HeatStress, CIs=TRUE)
+emmip(m18,BL~HeatStress)
+plot(d, comparison=T)
+```
+
+```{r}
+nd$treat<-with(nd, interaction(BL,HeatStress))
+
+model2<-lmer(SpikeLength~treat+(1|Rep)+(1|Chamber), data=nd)
+
+trt2<-glht(model2,linfct=mcp(treat="Tukey"))
+summary(trt2)
+confint(trt2)
+```
+
+```{r}
+m9<-lmer(SpikeLength ~ HeatStress + BL+(1|Rep)+(1|Chamber), data=newdata7)
+Anova(m9, test.statistic = "F")
+summary(m9)
+```
+
+```{r}
+mean2<-emmeans(m9,c("BL","HeatStress"))
+SHforplot<-data.frame(mean2)
+
+
+#write.csv(SHforplot,'C:/Users/r31j968/OneDrive - Montana State University - Bozeman/Documents/R analysis/SHforplot.csv', row.names = TRUE)
+```
+
+
+```{r}
+emmip(m9,BL~HeatStress, CIs=TRUE)
+```
+
+
+
+
+```{r, fig.width=11}
+intplotarray(SpikeLength~BL*HeatStress, data=newdata7)
+
+```
+
+
+
+```{r}
+m10<-lmer(SpikeLength ~ HeatStress * BL+(1|Rep)+(1|Chamber), data=newdata7)
+Anova(m10, test.statistic = "F")
+summary(m10)
+```
+No interaction. Use additive model. 
+
+
+
+
+```{r}
+hilSL<-mwb3[mwb3$Line == "Hiline" & !mwb3$Rep =="3",]
+nd4<-hilSL
+mthSL<-mwb3[mwb3$Line == "MTH" & !mwb3$Rep =="3",]
+nd5<-mthSL
+```
+
+```{r, fig.width=11}
+intplotarray(SpikeLength~BL*HeatStress, data=nd4)
+intplotarray(SpikeLength~BL*HeatStress, data=nd5)
+
+```
+
+```{r}
+m25<-lmer(SpikeLength ~ HeatStress * BL+(1|Rep)+(1|Chamber), data=nd4)
+Anova(m25, test.statistic = "F")
+summary(m25)
+```
+
+
+```{r}
+e<-emmeans(m25, c("BL", "HeatStress"))
+plot(e, comparison=T)
+```
+
+```{r}
+nd4$treat<-with(nd4, interaction(BL,HeatStress))
+
+model3<-lmer(SpikeLength~treat+(1|Rep)+(1|Chamber), data=nd4)
+
+trt3<-glht(model3,linfct=mcp(treat="Tukey"))
+summary(trt3)
+confint(trt3)
+```
+
+```{r}
+m26<-lmer(SpikeLength ~ HeatStress * BL+(1|Rep)+(1|Chamber), data=nd5)
+Anova(m26, test.statistic = "F")
+summary(m26)
+```
+
+```{r}
+m<-lmer(SpikeLength ~ HeatStress + BL+(1|Rep)+(1|Chamber), data=nd5)
+Anova(m2, test.statistic = "F")
+summary(m2)
+```
+
+```{r}
+#f<-emmeans(m26, c("BL", "HeatStress"))
+#plot(f, comparison=T)
+```
+
+```{r}
+nd5$treat<-with(nd5, interaction(BL,HeatStress))
+
+model4<-lmer(SpikeLength~treat+(1|Rep)+(1|Chamber), data=nd5)
+
+trt4<-glht(model4,linfct=mcp(treat="Tukey"))
+summary(trt4)
+```
+
+
+
+Grain no per spike 
+
+```{r}
+rep2<-read_excel("harvesting rep 2.xlsx", sheet=2)
+rep1<-read_excel("harvesting rep 1.xlsx", sheet=3)
+rep3<-read_excel("harvesting rep 3.xlsx", sheet=2)
+
+```
+
+
+
+```{r}
+gN1 <- aggregate(rep1$GrainNo., by = list(rep1$Rep, rep1$Line,rep1$BL,rep1$Chamber,rep1$HeatStress, rep1$Plant,rep1$Spike), FUN = sum)
+gN2 <- aggregate(rep2$GrainNo., by = list(rep2$Rep, rep2$Line,rep2$BL,rep2$Chamber,rep2$HeatStress, rep2$Plant,rep2$Spike), FUN=sum)
+gN3 <- aggregate(rep3$GrainNo., by = list(rep3$Rep, rep3$Line,rep3$BL,rep3$Chamber,rep3$HeatStress, rep3$Plant,rep3$Spike), FUN = sum)
+
+```
+
+
+###do not run, only for making data sheets
+g1 <- aggregate(rep1$GrainNo., by = list(rep1$Line,rep1$BL,rep1$Chamber,rep1$HeatStress, rep1$Plant), FUN = sum)
+g2 <- aggregate(rep2$GrainNo., by = list(rep2$Line,rep2$BL,rep2$Chamber,rep2$HeatStress, rep2$Plant), FUN=sum)
+g3 <- aggregate(rep3$GrainNo., by = list(rep3$Line,rep3$BL,rep3$Chamber,rep3$HeatStress, rep3$Plant), FUN = sum)
+
+grain1<-data.frame(g1)
+grain2<-data.frame(g2)
+grain3<-data.frame(g3)
+write.csv(grain1,'C:/Users/r31j968/OneDrive - Montana State University - Bozeman/Documents/R analysis/grain1.csv', row.names = TRUE)
+write.csv(grain2,'C:/Users/r31j968/OneDrive - Montana State University - Bozeman/Documents/R analysis/grain2.csv', row.names = TRUE)
+write.csv(grain3,'C:/Users/r31j968/OneDrive - Montana State University - Bozeman/Documents/R analysis/grain3.csv', row.names = TRUE)
+
+
+
+
+```{r}
+
+grainNo1<-data.frame(gN1)
+grainNo2<-data.frame(gN2)
+grainNo3<-data.frame(gN3)
+
+
+
+newdata8<-rbind(grainNo1,grainNo2, grainNo3)
+
+```
+
+write.csv(grainNo1,'C:/Users/r31j968/OneDrive - Montana State University - Bozeman/Documents/R analysis/grainNo1.csv', row.names = TRUE)
+write.csv(grainNo2,'C:/Users/r31j968/OneDrive - Montana State University - Bozeman/Documents/R analysis/grainNo2.csv', row.names = TRUE)
+write.csv(grainNo3,'C:/Users/r31j968/OneDrive - Montana State University - Bozeman/Documents/R analysis/grainNo3.csv', row.names = TRUE)
+
+
+```{r}
+names(newdata8)[names(newdata8) == "Group.1"] <- "Rep"
+names(newdata8)[names(newdata8) == "Group.2"] <- "Line"
+names(newdata8)[names(newdata8) == "Group.3"] <- "BL"
+names(newdata8)[names(newdata8) == "Group.4"] <- "Chamber"
+names(newdata8)[names(newdata8) == "Group.5"] <- "HS"
+names(newdata8)[names(newdata8) == "Group.6"] <- "Plant"
+names(newdata8)[names(newdata8) == "Group.7"] <- "Spike"
+names(newdata8)[names(newdata8) == "x"] <- "GrainNo"
+```
+
+
+```{r}
+newdata8$Line<-factor(newdata8$Line)
+newdata8$BL<-factor(newdata8$BL)
+newdata8$HS<-factor(newdata8$HS)
+newdata8$Rep<-factor(newdata8$Rep)
+```
+
+
+```{r}
+vidaGN <- newdata8[newdata8$Line == "Vida",]
+hilGN <- newdata8[newdata8$Line == "Hiline",]
+mthGN <- newdata8[newdata8$Line == "MTH",]
+nd6<-vidaGN
+nd7<-hilGN
+nd8<-mthGN
+```
+
+
+```{r}
+m13<-lmer(GrainNo ~ HS * BL+(1|Rep)+(1|Chamber), data=newdata8)
+Anova(m13, test.statistic = "F")
+summary(m13)
+```
+
+```{r, fig.width=11}
+intplotarray(GrainNo ~ HS * BL, data=newdata8)
+```
+
+```{r}
+m27<-lmer(GrainNo ~ HS * BL+(1|Rep)+(1|Chamber), data=nd6)
+Anova(m27, test.statistic = "F")
+summary(m27)
+```
+
+```{r}
+g<-emmeans(m27, c("BL", "HS"))
+plot(g, comparison=T)
+```
+
+```{r}
+nd6$treat<-with(nd6, interaction(BL,HS))
+
+model5<-lmer(GrainNo~treat+(1|Rep)+(1|Chamber), data=nd6)
+
+trt5<-glht(model5,linfct=mcp(treat="Tukey"))
+summary(trt5)
+confint(trt5)
+```
+
+```{r}
+m28<-lmer(GrainNo ~ HS * BL+(1|Rep)+(1|Chamber), data=nd7)
+Anova(m28, test.statistic = "F")
+summary(m28)
+```
+
+```{r}
+h<-emmeans(m28, c("BL", "HS"))
+plot(h, comparison=T)
+```
+
+
+```{r}
+nd7$treat<-with(nd7, interaction(BL,HS))
+
+model6<-lmer(GrainNo~treat+(1|Rep)+(1|Chamber), data=nd7)
+
+trt6<-glht(model6,linfct=mcp(treat="Tukey"))
+summary(trt6)
+confint(trt6)
+```
+
+```{r}
+m29<-lmer(GrainNo ~ HS + BL+(1|Rep)+(1|Chamber), data=nd8)
+Anova(m29, test.statistic = "F")
+summary(m29)
+```
+
+```{r}
+i<-emmeans(m29, c("BL", "HS"))
+plot(i, comparison=T)
+```
+
+```{r}
+nd8$treat<-with(nd8, interaction(BL,HS))
+
+model7<-lmer(GrainNo~treat+(1|Rep)+(1|Chamber), data=nd8)
+
+trt7<-glht(model7,linfct=mcp(treat="Tukey"))
+summary(trt7)
+```
+
+```{r, fig.width=11}
+intplotarray(GrainNo ~ HS * BL, data=nd6)
+intplotarray(GrainNo ~ HS * BL, data=nd7)
+intplotarray(GrainNo ~ HS * BL, data=nd8)
+
+```
+
+```{r}
+vida_C <- newdata8[newdata8$Line == "Vida"& newdata8$BL == "C",]
+vida_S <- newdata8[newdata8$Line == "Vida"& newdata8$BL == "S",]
+newdata9<-rbind(vida_C,vida_S)
+```
+
+```{r}
+m14<-lmer(GrainNo ~ HS * BL+(1|Rep)+(1|Chamber), data=newdata9)
+Anova(m14, test.statistic = "F")
+summary(m14)
+```
+
+```{r, fig.width=11}
+intplotarray(GrainNo ~ HS * BL, data=newdata9)
+```
+
+```{r}
+mean5<-emmeans(m14,c("BL","HS"))
+
+emmip(m14,BL~HS, CIs=TRUE)
+```
+
+```{r}
+emmip(m14,BL~HS)
+
+```
+
+
+
+
+```{r, fig.width=11}
+intplotarray(GrainNo~BL*HS, data=newdata9)
+```
+
+
+
+```{r}
+SW<-newdata[!newdata$Rep=="3",]
+SW$SeedWeight <- as.numeric(SW$SeedWeight)
+pirateplot(SeedWeight~BL+HeatStress+Rep, ylim=c(-1,16),data=SW)
+```
+
+```{r}
+m16<-lmer(SeedWeight~BL*HeatStress+(1|Rep)+(1|Chamber), data=SW)
+Anova(m16, test.statistic = "F")
+summary(m16)
+```
+No sig difference
+
+```{r}
+m17<-lmer(SeedWeight~BL+HeatStress+(1|Rep)+(1|Chamber), data=SW)
+Anova(m17, test.statistic = "F")
+summary(m17)
+```
+No sig difference
+
+```{r}
+emmeans(m16,c("BL","HeatStress"))
+
+emmip(m16,BL~HeatStress, CIs=TRUE)
+
+emmeans(m17,c("BL","HeatStress"))
+
+emmip(m17,BL~HeatStress, CIs=TRUE)
+```
+
+
+```{r}
+thGW<-read_excel("1000 grain weight.xlsx", sheet=1)
+```
+
+
+```{r}
+m23<-lmer(tGW~BL*HS+(1|Rep), data=thGW)
+Anova(m23, test.statistic = "F")
+summary(m23)
+```
+
+```{r}
+m24<-lmer(tGW~BL+HS+(1|Rep), data=thGW)
+Anova(m24, test.statistic = "F")
+summary(m24)
+```
+
+```{r, fig.width=11}
+intplotarray( tGW~BL*HS, data=thGW)
+```
+
+```{r}
+pirateplot(tGW~BL+HS, data=thGW, inf.method = "ci")
+```
+
+```{r}
+boxplot(tGW~BL+HS, data=thGW)
+
+```
+
+```{r}
+vidaGW <- thGW[thGW$Line == "Vida",]
+hilGW <- thGW[thGW$Line == "Hiline",]
+mthGW <- thGW[thGW$Line == "MTH",]
+nd1<-vidaGW
+nd2<-hilGW
+nd3<-mthGW
+```
+
+
+```{r}
+pirateplot(tGW~BL+HS, data=nd1, inf.method = "ci")
+pirateplot(tGW~BL+HS, data=nd2, inf.method = "ci")
+pirateplot(tGW~BL+HS, data=nd3, inf.method = "ci")
+
+```
+
+
+
+```{r, fig.width=11}
+intplotarray( tGW~BL*HS, data=nd1)
+intplotarray( tGW~BL*HS, data=nd2)
+intplotarray( tGW~BL*HS, data=nd3)
+```
+
+```{r}
+m30<-lmer(tGW~BL*HS+(1|Rep), data=nd1)
+Anova(m30, test.statistic = "F")
+summary(m30)
+```
+
+```{r}
+j<-emmeans(m30, c("BL", "HS"))
+plot(j, comparison=T)
+```
+
+```{r}
+nd1$treat<-with(nd1, interaction(BL,HS))
+
+model8<-lmer(tGW~treat+(1|Rep), data=nd1)
+
+trt8<-glht(model8,linfct=mcp(treat="Tukey"))
+summary(trt8)
+```
+
+```{r}
+m31<-lmer(tGW~BL+HS+(1|Rep), data=nd2)
+Anova(m31, test.statistic = "F")
+summary(m31)
+```
+
+```{r}
+k<-emmeans(m31, c("BL", "HS"))
+plot(k, comparison=T)
+```
+
+```{r}
+nd2$treat<-with(nd2, interaction(BL,HS))
+
+model9<-lmer(tGW~treat+(1|Rep), data=nd2)
+
+trt9<-glht(model9,linfct=mcp(treat="Tukey"))
+summary(trt9)
+```
+
+```{r}
+m32<-lmer(tGW~BL+HS+(1|Rep), data=nd3)
+Anova(m32, test.statistic = "F")
+summary(m32)
+```
+
+```{r}
+l<-emmeans(m32, c("BL", "HS"))
+plot(l, comparison=T)
+```
+
+```{r}
+nd3$treat<-with(nd3, interaction(BL,HS))
+
+model10<-lmer(tGW~treat+(1|Rep), data=nd3)
+
+trt10<-glht(model10,linfct=mcp(treat="Tukey"))
+summary(trt10)
+```

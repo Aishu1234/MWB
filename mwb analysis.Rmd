@@ -1,0 +1,427 @@
+---
+title: "512 project"
+output: word_document
+editor_options: 
+  chunk_output_type: inline
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+Heat stress is a crucial abiotic factor that affects crop and cereal yields all over the world. With climate changes, this has become an increasing problem over this decade and has affected production of staple crops. The growing human population will require increase in food supply in the coming decades, hence increase in crop productivity is essential to assure food security. But increase in mean temperature due to climate change and global warming damages crops and reduces yield.  One of the most important crops that is been affected by heat stress is wheat. Wheat is one of the most important staple food crops cultivated worldwide and being the third most planted crop in the United States, yield losses of wheat are a major concern. In Montana wheat is the leading cash crop. It is established that temperatures are too high for spring cereals to produce maximum yield during an average year and has been so for decades, as seen in Montana. Controlled environment studies have established that a 3-5% reduction in grain yield of wheat can occur for every 1 degree increase in average temperature above 15°C (Gibson and Paulsen 1999). Field data suggests that yield losses of wheat can be in the order of 190 kg/ha for every one degree rise in average temperature (Kuchel, Williams et al. 2007).
+
+I will be looking at the floret morphology of the spikes and the grain yield per plant. I have data from 2 replicates, and I want to compare both within and between replicates. I am currently not using the data in any other class but I am analyzing it to use in my thesis eventually. 
+
+Experiment design and procedure 
+1.	5 different treatments: seed soak (S), soil drench (D), head drench (H), foliar spray (F), control (C)
+2.	Seeds were soaked for 48 hr before planting, either in BL or water depending on the treatment. Water is for control. 
+3.	Plants were grown under normal conditions (22 C) till booting stage
+4.	Other treatments D, F, H: 
+a.	Rep1: After heat stress
+b.	Rep2: before heat stress
+5.	Plants were moved to heat stress (29 C) when they started booting and were kept in heat till flowering stage, then they were moved back to normal. 
+6.	5 pseudo reps were planted per treatment in one pot, two pots per treatment, one went to heat one set stayed in normal temp as control. 
+7.	Plants were allowed to mature and senesce and then harvested
+8.	Seeds were counted per spike while recording floret morphology (this is the data)
+
+```{r}
+suppressMessages(library(readxl))
+suppressMessages(library(car))
+suppressMessages(library(mosaic))
+##suppressMessages(library(vcd))
+##suppressMessages(library(tabplot))
+suppressMessages(library(yarrr))
+
+```
+
+```{r}
+
+Rep1_s1<-read_excel("harvesting rep 1.xlsx", sheet=1)
+head(Rep1_s1)
+
+```
+
+```{r}
+favstats(PlantHeight~TillerNumber,data=Rep1_s1)
+favstats(PlantHeight~BL,data=Rep1_s1)
+```
+
+```{r}
+Rep1_s1$Variety<-factor(Rep1_s1$Variety)
+Rep1_s1$BL<-factor(Rep1_s1$BL)
+Rep1_s1$HeatStress<-factor(Rep1_s1$HeatStress)
+Rep1_s1$Chamber<-factor(Rep1_s1$Chamber)
+
+```
+
+
+
+
+```{r, fig.width=9, fig.align='center', fig.height=6}
+
+pirateplot(PlantHeight ~ BL + HeatStress,xlab="Treatment", ylab="Plant height",inf.method="ci",data=Rep1_s1)
+pirateplot(PlantHeight ~ Chamber,xlab="chamber", ylab="Plant height",inf.method="ci",data=Rep1_s1)
+pirateplot(PlantHeight ~ BL +HeatStress+ Variety , data=Rep1_s1,inf.method="ci",ylab="plant height")
+pirateplot(PlantHeight ~ HeatStress +Chamber + BL, data=Rep1_s1,inf.method="ci")
+
+pirateplot(PlantHeight ~ HeatStress + BL, data=Rep1_s1,inf.method="ci")
+
+```
+
+
+
+
+A big difference between chambers which shouldn't be as they are supposed to be "identical". Plant height decreased for all treatments with heat stress (so no effect of BL?). Variation seen among different treatments and with different varieties (treatment+variety), treatments responding to heat differently. 
+ 
+
+
+```{r}
+pirateplot(TillerNumber ~ BL + HeatStress,data=Rep1_s1,inf.method="ci")
+pirateplot(TillerNumber ~ Variety + BL + HeatStress,data=Rep1_s1,inf.method="ci")
+pirateplot(TillerNumber ~ HeatStress + Chamber + BL, data=Rep1_s1,inf.method="ci")
+```
+
+
+```{r}
+pirateplot(PTN ~ BL + HeatStress,data=Rep1_s1,inf.method="ci")
+pirateplot(PTN ~ Variety + BL + HeatStress,data=Rep1_s1,inf.method="ci")
+pirateplot(PTN ~ HeatStress + Chamber + BL, data=Rep1_s1,inf.method="ci")
+```
+
+
+```{r}
+vida <- Rep1_s1[Rep1_s1$Variety == "Vida",]
+
+boxplot(vida$`PlantHeight` ~ vida$Variety + vida$BL + vida$`HeatStress` + vida$Chamber, las = 2)
+
+
+interaction.plot(x.factor = vida$`HeatStress`, trace.factor = vida$BL, response = vida$`PlantHeight`, col = rainbow(5), lwd = 5, fun = function(x) mean(x, na.rm = TRUE), xlab="heat stress", ylab="plant height")
+
+interaction.plot(x.factor = as.factor(vida$Chamber), trace.factor = vida$BL, response = vida$`PlantHeight`, col = rainbow(5), lwd = 5, fun = function(x) mean(x, na.rm = TRUE), xlab="chamber", ylab="plant height")
+```
+
+```{r}
+b <- Rep1_s1[Rep1_s1$Variety == "Berkut",]
+
+boxplot(b$`PlantHeight` ~ b$Variety + b$BL + b$`HeatStress` + b$Chamber, las = 2)
+
+interaction.plot(x.factor = b$`HeatStress`, trace.factor = b$BL, response = b$`PlantHeight`, col = rainbow(5), lwd = 5, fun = function(x) mean(x, na.rm = TRUE), xlab="heat stress", ylab="plant height")
+```
+
+```{r}
+hi <- Rep1_s1[Rep1_s1$Variety == "Hiline",]
+
+boxplot(hi$`PlantHeight` ~ hi$Variety + hi$BL + hi$`HeatStress` + hi$Chamber, las = 2)
+
+interaction.plot(x.factor = hi$`HeatStress`, trace.factor = hi$BL, response = hi$`PlantHeight`, col = rainbow(5), lwd = 5, fun = function(x) mean(x, na.rm = TRUE), xlab="heat stress", ylab="plant height")
+```
+
+```{r}
+mt <- Rep1_s1[Rep1_s1$Variety == "MTH",]
+
+boxplot(mt$`PlantHeight` ~ mt$Variety + mt$BL + mt$`HeatStress` +mt$Chamber, las = 2)
+
+interaction.plot(x.factor = mt$`HeatStress`, trace.factor = mt$BL, response = mt$`PlantHeight`, col = rainbow(5), lwd = 5, fun = function(x) mean(x, na.rm = TRUE), xlab="heat stress", ylab="plant height")
+
+```
+
+
+
+
+
+```{r}
+model1 <- lm(PlantHeight ~ BL * HeatStress * Variety,na.action=na.exclude, data = Rep1_s1)
+Anova(model1)
+model2<-lm(PlantHeight ~ BL + HeatStress + Variety, na.action=na.exclude,data = Rep1_s1)
+Anova(model2)
+anova(model2,model1)
+
+par(mfrow=c(2,2)); plot(model1)
+par(mfrow=c(2,2)); plot(model2)
+
+
+crPlots(model2)
+```
+
+Daignostic plots: Maybe a time trend like pattern in residuals vs fitted? Normality looks good. A little lower tail in the model1 plot. No inflential points. 
+
+no CR plot for interaction model. If I use effects plot, it does not like if I have missing values. 
+
+
+```{r}
+model3<-lm(PlantHeight ~ BL + HeatStress + Variety+Chamber,na.action=na.exclude, data = Rep1_s1)
+model4<-lm(PlantHeight ~ BL + HeatStress + Variety,na.action=na.exclude, data = Rep1_s1)
+anova(model4,model3)
+
+par(mfrow=c(2,2)); plot(model3)
+par(mfrow=c(2,2)); plot(model4)
+```
+
+
+```{r}
+Rep1_s3<- read_excel("harvesting rep 1.xlsx", sheet = 3)
+head(Rep1_s3)
+
+Rep1_s3$Line<-factor(Rep1_s3$Line)
+Rep1_s3$BL<-factor(Rep1_s3$BL)
+Rep1_s3$HeatStress<-factor(Rep1_s3$HeatStress)
+
+grainNo <- aggregate(Rep1_s3$GrainNo., by = list(Rep1_s3$HeatStress, Rep1_s3$Plant, Rep1_s3$Line, Rep1_s3$Chamber, Rep1_s3$BL), FUN = sum)
+grainNo
+```
+
+```{r, fig.width=8}
+pirateplot(SpikeLength ~ Line + HeatStress, data=Rep1_s3,inf.method="ci")
+
+pirateplot(SpikeLength ~ HeatStress + Line, data=Rep1_s3,inf.method="ci")
+
+pirateplot(SpikeLength ~ BL+ Line + HeatStress , data=Rep1_s3)
+
+pirateplot(SpikeLength ~ BL+ HeatStress , data=Rep1_s3,inf.method="ci")
+```
+
+
+```{r}
+interaction.plot(x.factor = Rep1_s3$HeatStress, trace.factor = Rep1_s3$Chamber, response = Rep1_s3$SpikeLength, col = rainbow(5), lwd = 5, fun = function(x) mean(x, na.rm = TRUE),xlab="heat stress", ylab="spike length")
+
+interaction.plot(x.factor = Rep1_s3$HeatStress, trace.factor = Rep1_s3$BL, response = Rep1_s3$SpikeLength, col = rainbow(5), lwd = 5, fun = function(x) mean(x, na.rm = TRUE), xlab="heat stress", ylab="spike length")
+
+```
+
+```{r}
+v <- Rep1_s3[Rep1_s3$Line == "Vida",]
+
+par(mar=c(7,5,2,2)); boxplot(v$SpikeLength ~ v$BL + v$HeatStress + v$Chamber, las = 2)
+
+pirateplot(v$SpikeLength ~  v$BL + v$HeatStress , data=Rep1_s3)
+
+interaction.plot(x.factor = v$HeatStress, trace.factor = v$BL, response = v$SpikeLength, col = rainbow(5), lwd = 5, fun = function(x) mean(x, na.rm = TRUE), xlab="heat stress", ylab="spike length")
+
+interaction.plot(x.factor = as.factor(v$Chamber), trace.factor = v$BL, response = v$SpikeLength, col = rainbow(5), lwd = 5, fun = function(x) mean(x, na.rm = TRUE), xlab="chamber", ylab="spike length")
+
+
+```
+
+
+```{r}
+hil <- Rep1_s3[Rep1_s3$Line == "Hiline",]
+
+boxplot(hil$SpikeLength ~ hil$Line + hil$BL + hil$HeatStress + hil$Chamber, las = 2)
+
+interaction.plot(x.factor = hil$HeatStress, trace.factor = hil$BL, response = hil$SpikeLength, col = rainbow(5), lwd = 5, fun = function(x) mean(x, na.rm = TRUE), xlab="heat stress", ylab="spike length")
+```
+
+```{r}
+ber <- Rep1_s3[Rep1_s3$Line == "Berkut",]
+
+boxplot(ber$SpikeLength ~ ber$Line + ber$BL + ber$HeatStress + ber$Chamber, las = 2)
+
+interaction.plot(x.factor = ber$HeatStress, trace.factor = ber$BL, response = ber$SpikeLength, col = rainbow(5), lwd = 5, fun = function(x) mean(x, na.rm = TRUE), xlab="heat stress", ylab="spike length")
+```
+
+```{r}
+mth <- Rep1_s3[Rep1_s3$Line == "MTH",]
+
+boxplot(mth$SpikeLength ~ mth$Line + mth$BL + mth$HeatStress + mth$Chamber, las = 2)
+
+interaction.plot(x.factor = mth$HeatStress, trace.factor = mth$BL, response = mth$SpikeLength, col = rainbow(5), lwd = 5, fun = function(x) mean(x, na.rm = TRUE), xlab="heat stress", ylab="spike length")
+```
+
+
+```{r}
+model5 <- lm(SpikeLength ~ HeatStress * BL,na.action=na.exclude , data = Rep1_s3)
+Anova(model5)
+model6<-lm(SpikeLength ~ HeatStress + BL ,na.action=na.exclude, data = Rep1_s3)
+anova(model6,model5)
+
+par(mfrow=c(2,2)); plot(model5)
+par(mfrow=c(2,2)); plot(model6)
+
+
+```
+
+Normality is good. Everything else is weird. 
+
+```{r}
+model7<-lm(SpikeLength ~ HeatStress + BL + Chamber , data = Rep1_s3)
+model8<-lm(SpikeLength ~ HeatStress + BL , data = Rep1_s3)
+anova(model8,model7)
+
+par(mfrow=c(2,2)); plot(model7)
+par(mfrow=c(2,2)); plot(model8)
+
+
+```
+
+Normality is good. Everything else is weird. 
+
+```{r}
+pirateplot(grainNo$x ~ grainNo$Group.5+grainNo$Group.3+grainNo$Group.1,data=Rep1_s3,inf.method="ci")
+
+pirateplot(grainNo$x ~ grainNo$Group.4+grainNo$Group.1,data=Rep1_s3,inf.method="ci")
+
+pirateplot(grainNo$x ~ grainNo$Group.1 + grainNo$Group.3,ylab="grain number",data=Rep1_s3,inf.method="ci")
+
+pirateplot(grainNo$x ~ grainNo$Group.4, ylab="grain number",data=Rep1_s3,inf.method="ci")
+
+pirateplot(grainNo$x ~ grainNo$Group.1 + grainNo$Group.5,xlab="treatment", ylab="grain number",data=Rep1_s3,inf.method="ci")
+
+```
+
+
+#######Rep2 
+
+
+```{r}
+Rep2_s1<-read_excel("harvesting rep 2.xlsx", sheet=1)
+```
+
+```{r}
+Rep2_s1$Variety<-factor(Rep2_s1$Variety)
+Rep2_s1$BL<-factor(Rep2_s1$BL)
+Rep2_s1$HeatStress<-factor(Rep2_s1$HeatStress)
+
+```
+
+```{r, fig.width=9.5, fig.height=6}
+pirateplot(PlantHeight ~ BL + HeatStress,xlab="Treatment", ylab="Plant height",data=Rep2_s1,inf.method="ci")
+###pirateplot(PlantHeight ~ Chamber,xlab="chamber", ylab="Plant height", data=Rep2_s1,inf.method="ci")
+pirateplot(PlantHeight ~ BL +HeatStress+ Variety , data=Rep2_s1,ylab="plant height")
+pirateplot(PlantHeight ~ HeatStress + BL, data=Rep2_s1,inf.method="ci")
+
+```
+
+
+
+```{r}
+pirateplot(TillerNumber ~ BL + HeatStress,data=Rep2_s1,inf.method="ci")
+pirateplot(TillerNumber ~ Variety + BL + HeatStress,data=Rep2_s1,inf.method="ci")
+pirateplot(TillerNumber ~ HeatStress + BL, data=Rep2_s1,inf.method="ci")
+```
+
+
+```{r}
+v2 <- Rep2_s1[Rep2_s1$Variety == "Vida",]
+
+boxplot(v2$`PlantHeight` ~ v2$Variety + v2$BL + v2$`HeatStress` , las = 2)
+
+
+interaction.plot(x.factor = v2$`HeatStress`, trace.factor = v2$BL, response = v2$`PlantHeight`, col = rainbow(5), lwd = 5, fun = function(x) mean(x, na.rm = TRUE), xlab="heat stress", ylab="plant height")
+
+
+```
+
+```{r}
+model9 <- lm(PlantHeight ~ BL * HeatStress * Variety,na.action=na.exclude, data = Rep2_s1)
+Anova(model9)
+model10<-lm(PlantHeight ~ BL + HeatStress + Variety, na.action=na.exclude,data = Rep2_s1)
+Anova(model10)
+anova(model10,model9)
+
+par(mfrow=c(2,2)); plot(model9)
+par(mfrow=c(2,2)); plot(model10)
+```
+
+
+```{r}
+model11<-lm(PlantHeight ~ BL + HeatStress + Variety,na.action=na.exclude, data = Rep2_s1)
+
+par(mfrow=c(2,2)); plot(model11)
+```
+
+```{r}
+Rep2_s2<- read_excel("harvesting rep 2.xlsx", sheet = 2)
+
+
+grainNo2 <- aggregate(Rep2_s2$GrainNo., by = list(Rep2_s2$HeatStress, Rep2_s2$Plant, Rep2_s2$Line, Rep2_s2$BL), FUN = sum)
+grainNo2
+
+Rep2_s2$Line<-factor(Rep2_s2$Line)
+Rep2_s2$BL<-factor(Rep2_s2$BL)
+Rep2_s2$HeatStress<-factor(Rep2_s2$HeatStress)
+```
+
+
+```{r}
+vida2 <- Rep2_s2[Rep2_s2$Line == "Vida",]
+
+##boxplot(vida2$SpikeLength ~ vida2$Line + vida2$BL + vida2$HeatStress , las=2)
+
+pirateplot(vida2$SpikeLength ~ vida2$BL + vida2$HeatStress , data=Rep2_s2)
+
+interaction.plot(x.factor = vida2$HeatStress, trace.factor = vida2$BL, response = vida2$SpikeLength, col = rainbow(5), lwd = 5, fun = function(x) mean(x, na.rm = TRUE), xlab="heat stress", ylab="spike length", ylim=c(6,8))
+
+
+```
+
+
+```{r}
+ber2 <- Rep2_s2[Rep2_s2$Variety == "Berkut",]
+
+boxplot(ber2$`PlantHeight` ~ ber2$Variety + ber2$BL + ber2$`HeatStress` , las = 2)
+
+interaction.plot(x.factor = ber2$`HeatStress`, trace.factor = ber2$BL, response = ber2$`PlantHeight`, col = rainbow(5), lwd = 5, fun = function(x) mean(x, na.rm = TRUE), xlab="heat stress", ylab="plant height")
+
+
+
+hi <- Rep2_s2[Rep2_s2$Variety == "Hiline",]
+
+boxplot(hi$`PlantHeight` ~ hi$Variety + hi$BL + hi$`HeatStress` + hi$Chamber, las = 2)
+
+interaction.plot(x.factor = hi$`HeatStress`, trace.factor = hi$BL, response = hi$`PlantHeight`, col = rainbow(5), lwd = 5, fun = function(x) mean(x, na.rm = TRUE), xlab="heat stress", ylab="plant height")
+
+
+
+mt <- Rep2_s2[Rep2_s2$Variety == "MTH",]
+
+boxplot(mt$`PlantHeight` ~ mt$Variety + mt$BL + mt$`HeatStress` +mt$Chamber, las = 2)
+
+interaction.plot(x.factor = mt$`HeatStress`, trace.factor = mt$BL, response = mt$`PlantHeight`, col = rainbow(5), lwd = 5, fun = function(x) mean(x, na.rm = TRUE), xlab="heat stress", ylab="plant height")
+```
+
+
+```{r}
+pirateplot(SpikeLength ~ Line + HeatStress, data=Rep2_s2,inf.method="ci")
+
+pirateplot(SpikeLength ~ HeatStress + Line, data=Rep2_s2,inf.method="ci")
+
+pirateplot(SpikeLength ~ BL+ Line + HeatStress , ylab="spike length", data=Rep2_s2,inf.method="ci")
+
+pirateplot(SpikeLength ~ BL+ HeatStress , data=Rep2_s2,inf.method="ci")
+```
+
+
+```{r}
+model12 <- lm(SpikeLength ~ HeatStress * BL,na.action=na.exclude , data = Rep2_s2)
+Anova(model12)
+model13<-lm(SpikeLength ~ HeatStress + BL ,na.action=na.exclude, data = Rep2_s2)
+anova(model13,model12)
+
+par(mfrow=c(2,2)); plot(model12)
+par(mfrow=c(2,2)); plot(model13)
+```
+
+
+```{r}
+model14<-lm(SpikeLength ~ HeatStress + BL , data = Rep2_s2)
+
+
+par(mfrow=c(2,2)); plot(model14)
+
+```
+
+```{r}
+pirateplot(grainNo$x ~ grainNo$Group.5+grainNo$Group.3+grainNo$Group.1,data=Rep2_s2,inf.method="ci")
+
+pirateplot(grainNo$x ~ grainNo$Group.4+grainNo$Group.1,data=Rep2_s2,inf.method="ci")
+
+pirateplot(grainNo$x ~ grainNo$Group.1 + grainNo$Group.3,ylab="grain number",data=Rep2_s2,inf.method="ci")
+
+pirateplot(grainNo$x ~ grainNo$Group.4, ylab="grain number",data=Rep2_s2,inf.method="ci")
+
+pirateplot(grainNo$x ~ grainNo$Group.1 + grainNo$Group.5,xlab="treatment", ylab="grain number",data=Rep2_s2,inf.method="ci")
+```
+
+
+
