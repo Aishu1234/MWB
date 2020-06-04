@@ -22,7 +22,7 @@ suppressMessages(library(ggplot2))
 suppressMessages(library(Rmisc))
 suppressMessages(library(multcompView))
 suppressMessages(library(multcomp))
-
+library(beanplot)
 ```
 
 
