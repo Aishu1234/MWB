@@ -44,6 +44,7 @@ Pooling Vida only
 ```{r}
 vida <- mwb1[mwb1$Variety == "Vida",]
 newdata1<-vida
+vida1<-mwb1[mwb1$BL=="S",]
 ```
 
 ```{r}
