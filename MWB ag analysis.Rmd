@@ -22,8 +22,9 @@ suppressMessages(library(ggplot2))
 suppressMessages(library(Rmisc))
 suppressMessages(library(multcompView))
 suppressMessages(library(multcomp))
-library(beanplot)
+
 library(car)
+library(abind)
 ```
 
 
@@ -102,13 +103,44 @@ Spike length
 vida
 
 ```{r}
-mwb3<-read_excel("combined reps.xlsx", sheet=3)
+rep2<-read_excel("harvesting rep 2.xlsx", sheet=2)
+rep1<-read_excel("harvesting rep 1.xlsx", sheet=3)
+rep3<-read_excel("harvesting rep 3.xlsx", sheet=2)
 
-mwb3$Line<-factor(mwb3$Line)
-mwb3$BL<-factor(mwb3$BL)
-mwb3$HeatStress<-factor(mwb3$HeatStress)
-mwb3$Rep<-factor(mwb3$Rep)
 ```
+
+
+
+```{r}
+SL1 <- aggregate.data.frame(rep1$SpikeLength, by = list(rep1$Rep, rep1$Line,rep1$BL,rep1$Chamber,rep1$HeatStress, rep1$Plant,rep1$Spike),FUN=list)
+SL2 <- aggregate(rep2$SpikeLength, by = list(rep2$Rep, rep2$Line,rep2$BL,rep2$Chamber,rep2$HeatStress, rep2$Plant,rep2$Spike), FUN=mean, na.rm=T)
+SL3 <- aggregate(rep3$SpikeLength, by = list(rep3$Rep, rep3$Line,rep3$BL,rep3$Chamber,rep3$HeatStress, rep3$Plant,rep3$Spike), FUN = sum)
+
+```
+
+```{r}
+
+SpikeLength1<-data.frame(SL1)
+SpikeLength2<-data.frame(SL2)
+SpikeLength3<-data.frame(SL3)
+
+
+
+newdata9<-rbind(SpikeLength1,SpikeLength2, SpikeLength3)
+
+```
+
+```{r}
+write.csv(SpikeLength1,'C:/Users/USER/Downloads/R analysis/MWB/SpikeLength1.csv', row.names = TRUE)
+write.csv(SpikeLength2,'C:/Users/USER/Downloads/R analysis/MWB/SpikeLength2.csv', row.names = TRUE)
+write.csv(SpikeLength3,'C:/Users/USER/Downloads/R analysis/MWB/SpikeLength3.csv', row.names = TRUE)
+```
+
+```{r}
+names(newdata9) <- c("Rep","Line", "BL", "Chamber", "HeatStress", "Plant", "Spike", "Spikelength")
+
+```
+
 
 
 
@@ -162,12 +194,6 @@ confint(trt2)
 
 Grain Number per spike
 
-```{r}
-rep2<-read_excel("harvesting rep 2.xlsx", sheet=2)
-rep1<-read_excel("harvesting rep 1.xlsx", sheet=3)
-rep3<-read_excel("harvesting rep 3.xlsx", sheet=2)
-
-```
 
 
 

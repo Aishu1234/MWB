@@ -1,0 +1,62 @@
+---
+title: "trying something"
+author: "Aishwarya Kothari"
+date: "11/20/2020"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+```{r}
+suppressMessages(library(readxl))
+suppressMessages(library(car))
+suppressMessages(library(mosaic))
+suppressMessages(library(yarrr))
+suppressMessages(library(lmerTest))
+suppressMessages(library(emmeans))
+suppressMessages(library(effects))
+suppressMessages(library(ggplot2))
+suppressMessages(library(Rmisc))
+suppressMessages(library(multcompView))
+suppressMessages(library(multcomp))
+```
+
+
+```{r}
+rep1<-read_excel("harvesting rep 1.xlsx", sheet=3)
+rep2<-read_excel("harvesting rep 2.xlsx", sheet=2)
+rep3<-read_excel("harvesting rep 3.xlsx", sheet=2)
+
+```
+
+
+
+```{r}
+SL1 <- aggregate.data.frame(rep1$SpikeLength, by = list(rep1$Rep, rep1$Line,rep1$BL,rep1$Chamber,rep1$HeatStress, rep1$Plant,rep1$Spike),FUN=list)
+SL2 <- aggregate(rep2$SpikeLength, by = list(rep2$Rep, rep2$Line,rep2$BL,rep2$Chamber,rep2$HeatStress, rep2$Plant,rep2$Spike), FUN=mean, na.rm=T)
+SL3 <- aggregate(rep3$SpikeLength, by = list(rep3$Rep, rep3$Line,rep3$BL,rep3$Chamber,rep3$HeatStress, rep3$Plant,rep3$Spike), FUN = sum)
+
+```
+
+```{r}
+
+SpikeLength1<-data.frame(SL1)
+SpikeLength2<-data.frame(SL2)
+SpikeLength3<-data.frame(SL3)
+
+
+
+newdata8<-rbind(SpikeLength1,SpikeLength2, SpikeLength3)
+
+```
+
+```{r}
+write.csv(SpikeLength1,'C:/Users/USER/Downloads/R analysis/MWB/SpikeLength1.csv', row.names = TRUE)
+write.csv(SpikeLength2,'C:/Users/USER/Downloads/R analysis/MWB/SpikeLength2.csv', row.names = TRUE)
+write.csv(SpikeLength3,'C:/Users/USER/Downloads/R analysis/MWB/SpikeLength3.csv', row.names = TRUE)
+```
+
+
+
