@@ -39,9 +39,6 @@ names(mwb1)[names(mwb1) == "HeatStress"] <- "Stress"
 
 Change HeatStress to Stress everywhere hence forward. 
 
-```{r}
-mwb1<-mwb1[!mwb1$Rep=="1",]
-```
 
 ```{r}
 mwb2<-mwb1[!mwb1$Rep == "1" | !mwb1$BL %in% c("F", "H", "D"),]
@@ -67,7 +64,7 @@ pirateplot(PlantHeight~Variety +Rep, data=mwb1, inf.method="ci",cex.names=0.8)
 
 Pooling Vida only 
 ```{r}
-vida <- mwb1[mwb1$Variety == "Vida",]
+vida <- mwb2[mwb2$Variety == "Vida",]
 newdata1<-vida
 ```
 
@@ -113,43 +110,39 @@ p+
 pirateplot(PlantHeight ~ BL + Stress, inf.method = "ci", ylab="Mean Plant Height (cm)", data=newdata1)
 ```
 
-
-
 ```{r}
-pirateplot(vida$PlantHeight ~ vida$BL + vida$Stress + vida$Rep , data=mwb1)
-```
-
-In all reps, heat stress overall reduced plant height. 
-In rep 1: D,F,H had taller plants than C under heat stress. In control plants (no HS), BL did not seem to have a positive effect on plant height; C treatment plants were taller. 
-In rep 2: S had taller plants than C in both HS and no HS. In no HS: F and H had taller plants than C. In HS: all BL treatments had taller plants than C
-In rep 3: D,S had taller plants than C in HS. 
-
-```{r}
-pirateplot(vida$PlantHeight ~ vida$BL +  vida$Rep,inf.method="ci" , data=mwb1)
+boxplot(PlantHeight ~ BL + Stress, data=newdata1)
 ```
 
 ```{r}
-pirateplot(vida$PlantHeight ~ vida$Stress + vida$Rep,inf.method="ci" , data=mwb1)
+boxplot.stats(newdata1$PlantHeight)$out
 ```
 
-In all 3 reps, HS reduced plant height. But, reps 2 and 3 had less reduction in height compared to rep 1.
 
 ```{r}
-pirateplot(vida$PlantHeight ~ vida$Rep,inf.method="ci" , data=mwb1)
-```
-
-```{r}
-pirateplot(vida$TillerNumber ~ vida$BL + vida$Stress + vida$Rep , data=mwb1)
-```
-
-Can't say a lot about tiller number, it is inconclusive. 
-
-```{r}
-pirateplot(vida$TillerNumber ~ vida$BL +  vida$Rep,inf.method="ci" , data=mwb1)
+summary(newdata1$PlantHeight)
+summary(newdata1$TillerNumber)
+summary(newdata1$PTN)
 ```
 
 ```{r}
-pirateplot(vida$TillerNumber ~ vida$Stress + vida$Rep,inf.method="ci" , data=mwb1)
+pirateplot(PlantHeight ~ BL +Rep, ylab="Mean Plant Height (cm)", data=newdata1)
+```
+
+
+
+```{r}
+pirateplot(TillerNumber ~ BL + Stress + Rep , data=newdata1)
+```
+
+
+
+```{r}
+pirateplot(TillerNumber ~ BL +  Rep,inf.method="ci" , data=newdata1)
+```
+
+```{r}
+pirateplot(TillerNumber ~ BL+Stress ,inf.method="ci" , data=newdata1)
 ```
 
 HS reduced tiller number in reps 1 and 3. 
