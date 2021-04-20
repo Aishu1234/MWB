@@ -824,7 +824,7 @@ write.csv(newdata8,'C:/Users/kotha/Desktop/R analysis/MWB/SpikeLength.csv', row.
 ```
 
 ```{r}
-sl<-read.csv("SpikeLength2.csv")
+sl<-read.csv("SpikeLength3.csv")
 ```
 
 ```{r}
@@ -851,6 +851,47 @@ summary(model)
 ```
 
 
+```{r}
+library(effectsize)
+eta_squared(model,partial=T, generalized=F, ci=0.9, verbose =T)
+```
+
+
+```{r}
+cohens_f(model, partial = F, squared = F, ci=0.9, verbose = T, model2=NULL)
+```
+
+```{r}
+interpret_eta_squared(0.32, rules = "cohen1992")
+```
+
+
+```{r}
+summary(sl1)
+```
+
+```{r}
+favstats(SpikeLength~BL, data=sl1)
+```
+
+```{r}
+sl2<-sl1
+```
+
+
+```{r}
+model1<-lmer(SpikeLength ~ BL * Stress+(1|Rep), data=sl2)
+anova(model1)
+Anova(model1)
+summary(model1)
+
+```
+
+```{r}
+m18<-lmer(SpikeLength ~ Line*Stress * BL+(1|Rep)+(1|Chamber), data=newdata8)
+Anova(m18, test.statistic = "F")
+summary(m18)
+```
 
 ```{r}
 pirateplot(SpikeLength ~ Line + Stress, inf.method = "ci", cex.names = 0.8, ylab = "Mean Spike Length (cm)", data=newdata8)
